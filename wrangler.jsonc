@@ -1,0 +1,13 @@
+{
+  // Cloudflare Worker（静态资产托管）配置。
+  // 关键：把 assets 目录钉死在 dist/，而不是仓库根。仓库根里有构建机自己装出来的
+  // node_modules（含 129MB 的 workerd 二进制），一旦被当成资产目录就会撞
+  // Workers 的 25 MiB 单文件上限，报 "Asset too large"。
+  // dist/ 由 Build command `node scripts/build-seo.mjs` 现场生成。
+  // 纯静态站点没有 Worker 脚本，因此不写 main，也不写 assets.binding。
+  "name": "cnusai",
+  "compatibility_date": "2026-10-08",
+  "assets": {
+    "directory": "./dist/"
+  }
+}
