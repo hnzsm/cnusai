@@ -41,6 +41,9 @@ const ONLY = String(flag('only', '')).split(',').map((s) => s.trim()).filter(Boo
 
 const ARENA_MIRROR = 'https://hf-mirror.com/datasets/lmarena-ai/leaderboard-dataset/resolve/main';
 const ARENA_ORIGIN = 'https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset/resolve/main';
+// huggingface.co is blocked from the mainland dev box but is the fastest route
+// from CI runners; the mirror is the fallback there and the primary route here.
+const ARENA_BASES = process.env.CI ? [ARENA_ORIGIN, ARENA_MIRROR] : [ARENA_MIRROR, ARENA_ORIGIN];
 const ARENA_FILE = 'latest-00000-of-00001.parquet';
 const ARENA_SOURCE_URL = 'https://lmarena.ai/leaderboard/';
 const SWE_URL = 'https://www.swebench.com/';
@@ -184,7 +187,7 @@ function roundTo(n, digits) {
 async function readParquet(dir) {
   let buf = null, used = '';
   const rel = `/${dir}/${ARENA_FILE}`;
-  for (const base of [ARENA_MIRROR, ARENA_ORIGIN]) {
+  for (const base of ARENA_BASES) {
     try { buf = await fetchArrayBuffer(base + rel); used = base + rel; break; }
     catch (e) { console.warn(`  ${dir}: fetch failed (${e.message}), trying next mirror`); }
   }
@@ -345,14 +348,21 @@ async function main() {
   console.log(`update-ranking: fetching ${wanted.length} board(s)…`);
 
   const boards = [];
+  const failed = [];
   for (const cfg of wanted) {
     try {
       boards.push(cfg.dir ? await buildArenaBoard(cfg) : await buildSweBoard(cfg));
     } catch (e) {
+      failed.push(cfg.key);
       console.warn(`  !! ${cfg.key} failed: ${e.message}`);
     }
   }
   if (!boards.length) throw new Error('every board failed to build — nothing to write');
+  // A full run replaces the whole array, so writing a partial result would
+  // silently delete the boards that failed to fetch. Only a merge run may proceed.
+  if (!ONLY.length && failed.length) {
+    throw new Error(`aborted: ${failed.length} board(s) failed (${failed.join(', ')}) — rerun later or use --only to merge`);
+  }
   boards.forEach(summarize);
 
   const src = fs.readFileSync(DATA, 'utf8');

@@ -1,0 +1,60 @@
+name: 周更模型排名快照
+
+on:
+  schedule:
+    # 每周一 04:30 UTC = 北京时间 12:30
+    - cron: '30 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      only:
+        description: '只刷新部分榜单（逗号分隔的 key，留空=全部）'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ranking-snapshot
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ONLY: ${{ github.event.inputs.only }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # CI=true 让脚本优先走 huggingface.co 源站（Runner 在海外），失败再回退 hf-mirror
+      - name: Fetch leaderboard snapshots into js/data.js
+        run: |
+          if [ -n "$ONLY" ]; then
+            node scripts/update-ranking.mjs --only "$ONLY"
+          else
+            node scripts/update-ranking.mjs
+          fi
+
+      # 顺带当校验：脚本会在沙箱里重新加载 data.js，语法坏了就整个任务失败、不提交
+      - name: Rebuild static snapshot
+        run: node scripts/build-seo.mjs
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- js/data.js index.html robots.txt sitemap.xml; then
+            echo "榜单无变化，跳过提交"
+            exit 0
+          fi
+          git add js/data.js index.html robots.txt sitemap.xml
+          git commit -m "自动更新模型排名快照（$(date -u +%F)）"
+          git push origin HEAD:main
