@@ -290,7 +290,24 @@ ${LANGS.filter((l) => l.code !== 'zh').map((l) => sitemapUrl(`${SITE}/?lang=${l.
 `;
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemap, 'utf8');
 
+// --- clean deploy bundle ---------------------------------------------------
+// The Pages output directory must NOT be the repo root: Cloudflare installs its
+// own deploy tooling into the checkout, so node_modules ends up inside the asset
+// tree and a single 129 MB workerd binary breaks the 25 MiB per-asset limit.
+// `dist/` holds only the files a visitor actually needs.
+const DIST = path.join(ROOT, 'dist');
+const DIST_FILES = ['index.html', 'robots.txt', 'sitemap.xml', 'logo.svg', 'og-cover.png'];
+const DIST_DIRS = ['css', 'js'];
+fs.rmSync(DIST, { recursive: true, force: true });
+fs.mkdirSync(DIST, { recursive: true });
+for (const f of DIST_FILES) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f));
+for (const d of DIST_DIRS) fs.cpSync(path.join(ROOT, d), path.join(DIST, d), { recursive: true });
+
+const sizeOf = (dir) => fs.readdirSync(dir, { withFileTypes: true })
+  .reduce((sum, e) => sum + (e.isDirectory() ? sizeOf(path.join(dir, e.name)) : fs.statSync(path.join(dir, e.name)).size), 0);
+
 console.log('SITE=' + SITE);
 console.log('cards: CN=' + CN.length + ' US=' + US.length + ' OSS=' + OSS.length + ' SKILLS=' + SKILLS.length + ' listItems=' + itemListItems.length);
 console.log('index.html bytes=' + Buffer.byteLength(indexHtml));
-console.log('WROTE index.html, robots.txt, sitemap.xml');
+console.log('dist/ = ' + sizeOf(DIST) + ' bytes → set Pages Build output directory to: dist');
+console.log('WROTE index.html, robots.txt, sitemap.xml, dist/');
