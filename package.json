@@ -1,0 +1,16 @@
+{
+  "name": "cnusai-nav",
+  "private": true,
+  "version": "1.0.0",
+  "description": "中美 AI 导航静态站 + SEO 预渲染构建",
+  "scripts": {
+    "build": "node scripts/build-seo.mjs",
+    "og": "node scripts/build-og.mjs",
+    "ranking": "node scripts/update-ranking.mjs",
+    "ranking:dry": "node scripts/update-ranking.mjs --dry"
+  },
+  "devDependencies": {
+    "hyparquet": "^1.31.2",
+    "sharp": "^0.35.5"
+  }
+}

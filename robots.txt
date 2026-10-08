@@ -1,0 +1,25 @@
+# https://www.cnusai.com/robots.txt
+User-agent: *
+Allow: /
+
+# Explicitly welcome major Chinese + global crawlers
+User-agent: Baiduspider
+Allow: /
+User-agent: Baiduspider-image
+Allow: /
+User-agent: 360Spider
+Allow: /
+User-agent: HaosouSpider
+Allow: /
+User-agent: Sogou web spider
+Allow: /
+User-agent: Bytespider
+Allow: /
+User-agent: Googlebot
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: DuckDuckBot
+Allow: /
+
+Sitemap: https://www.cnusai.com/sitemap.xml
