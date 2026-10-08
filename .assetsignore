@@ -1,0 +1,21 @@
+# 这些文件/目录绝不能被当成站点静态资源上传。
+# Workers 静态资产通道会在 assets 目录根读取本文件（语法同 .gitignore）。
+# 主修复是把 Pages 的 Build output directory 设为 dist；这里是第二道保险，
+# 防止 output directory 又指回仓库根时，平台自带的 node_modules（含 129MB 的
+# workerd 二进制）撞上 25 MiB 单文件上限。
+node_modules/
+.wrangler/
+.git/
+.github/
+.dev.vars
+package.json
+package-lock.json
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.bak
+*.local
+scripts/
+dist/
+og-cover.svg
+.assetsignore
