@@ -5,8 +5,6 @@ import { fileURLToPath } from 'url';
 // Project root = one level above this scripts/ dir (portable across machines/CI).
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://www.cnusai.com';
-// Cloudflare Web Analytics beacon (site = www.cnusai.com, manual install).
-const WA_TOKEN = '25b66d39efef4385be7420b8c765ae98';
 
 // --- load data.js in a shimmed window ---
 const sandbox = { window: {} };
@@ -173,11 +171,7 @@ ${LANGS.slice(1).map((l) => `  <meta property="og:locale:alternate" content="${l
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=13">
-
-  <!-- Cloudflare Web Analytics -->
-  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${WA_TOKEN}"}'></script>
-  <!-- End Cloudflare Web Analytics -->`;
+  <link rel="stylesheet" href="css/styles.css?v=13">`;
 
 const indexHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
