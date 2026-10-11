@@ -22,8 +22,11 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 function card(it) {
   const tag = TAGS[it.tag];
   const tagText = tag ? tag.zh : '';
+  const pills = (it.free ? '<span class="card-free">免费额度</span>' : '') +
+    (it.checkin ? '<span class="card-checkin">每日签到</span>' : '');
   return `      <a class="card" data-cat="${esc(it.tag)}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">` +
     `<span class="card-body"><span class="card-name">${esc(it.name)}</span>` +
+    (pills ? `<span class="card-badges">${pills}</span>` : '') +
     `<span class="card-intro">${esc(it.intro.zh)}</span></span>` +
     (tagText ? `<span class="card-tag">${esc(tagText)}</span>` : '') + `</a>`;
 }
@@ -171,7 +174,7 @@ ${LANGS.slice(1).map((l) => `  <meta property="og:locale:alternate" content="${l
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=13">`;
+  <link rel="stylesheet" href="css/styles.css?v=15">`;
 
 const indexHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -233,8 +236,8 @@ ${LANGS.map((l) => `          <option value="${l.code}"${l.code === 'zh' ? ' sel
     <div class="footer-bottom"><span id="footer">© ${new Date().getFullYear()} 中美 AI 导航 · 数据仅供导航参考 · 语言可手动切换</span></div>
   </footer>
 
-  <script src="js/data.js?v=17"></script>
-  <script src="js/app.js?v=24"></script>
+  <script src="js/data.js?v=19"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 </html>
 `;

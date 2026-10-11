@@ -12,6 +12,7 @@
   --cn: #ff5252;
   --us: #4d8dff;
   --oss: #37d0a3;
+  --checkin: #f0b34a;
   --skills: #b06bff;
   --radius: 14px;
   --shadow: 0 6px 20px rgba(0, 0, 0, .28);
@@ -255,9 +256,36 @@ main {
 .card-name {
   font-size: 14px;
   font-weight: 600;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 3px;
+}
+.card-free,
+.card-checkin {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.6;
+  padding: 0 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.card-free {
+  color: var(--oss);
+  border: 1px solid rgba(55, 208, 163, .38);
+  background: rgba(55, 208, 163, .12);
+}
+.card-checkin {
+  color: var(--checkin);
+  border: 1px solid rgba(240, 179, 74, .38);
+  background: rgba(240, 179, 74, .12);
 }
 .card-intro {
   font-size: 12px;

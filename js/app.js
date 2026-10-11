@@ -28,6 +28,8 @@
       rankMore: '查看更多',
       rankLess: '收起',
       rankSrc: '数据来源',
+      freeBadge: '免费额度',
+      checkinBadge: '每日签到',
       footerSource: '数据来源',
       footerAbout: '关于本站',
       footerAboutText: '收录中美 AI 产品与开源项目，模型排名取自 Chatbot Arena 与 SWE-bench 官方快照，仅作导航参考。',
@@ -56,6 +58,8 @@
       rankMore: 'Show more',
       rankLess: 'Collapse',
       rankSrc: 'Source',
+      freeBadge: 'Free credits',
+      checkinBadge: 'Daily check-in',
       footerSource: 'Data sources',
       footerAbout: 'About',
       footerAboutText: 'A directory of China & US AI products and open-source projects; model rankings are official snapshots from Chatbot Arena and SWE-bench, for reference only.',
@@ -71,7 +75,7 @@
   // 全球/中国/美国 region-tab order. Every other language uses the en layout.
   var LANGS = window.LANGS;
   var BUILT_IN = { zh: true, en: true };
-  var PACK_VERSION = '1';
+  var PACK_VERSION = '2';
 
   function findLang(code) {
     for (var i = 0; i < LANGS.length; i++) { if (LANGS[i].code === code) return LANGS[i]; }
@@ -257,6 +261,15 @@
       'onerror="iconNext(this)">' + initial + '</span>';
   }
 
+  // Quota pills sit on their own row: a card can carry both, and either label
+  // is long enough to eat the whole name line if it shares one.
+  function badgesHtml(item) {
+    var pills = '';
+    if (item.free) pills += '<span class="card-free">' + t('freeBadge') + '</span>';
+    if (item.checkin) pills += '<span class="card-checkin">' + t('checkinBadge') + '</span>';
+    return pills ? '<span class="card-badges">' + pills + '</span>' : '';
+  }
+
   function cardHtml(item) {
     var intro = introOf(item);
     var tagText = window.TAGS[item.tag] ? tagLabel(item.tag) : '';
@@ -264,6 +277,7 @@
       flagBadge(item) +
       '<span class="card-body">' +
         '<span class="card-name">' + item.name + '</span>' +
+        badgesHtml(item) +
         '<span class="card-intro">' + intro + '</span>' +
       '</span>' +
       (tagText ? '<span class="card-tag">' + tagText + '</span>' : '') +
