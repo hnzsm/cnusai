@@ -13,7 +13,7 @@
       usCol: '美国 AI 导航',
       ossCol: '开源 AI 项目',
       skillsCol: 'AI 技能（Skills）',
-      globalSearch: '全局搜索所有站点与技能…',
+      globalSearch: '全局搜索站点、技能与模型…',
       backTop: '回到顶部',
       resultSuffix: '个结果',
       detected: '已按您的地区切换界面语言',
@@ -28,6 +28,8 @@
       rankMore: '查看更多',
       rankLess: '收起',
       rankSrc: '数据来源',
+      modelHits: '个模型命中',
+      noModelHits: '没有匹配的模型，换个关键词试试',
       freeBadge: '免费额度',
       checkinBadge: '每日签到',
       footerSource: '数据来源',
@@ -43,7 +45,7 @@
       usCol: 'US AI',
       ossCol: 'Open-Source AI Projects',
       skillsCol: 'AI Skills',
-      globalSearch: 'Search all sites & skills…',
+      globalSearch: 'Search sites, skills & models…',
       backTop: 'Back to top',
       resultSuffix: 'results',
       detected: 'UI language set from your region',
@@ -58,6 +60,8 @@
       rankMore: 'Show more',
       rankLess: 'Collapse',
       rankSrc: 'Source',
+      modelHits: 'model matches',
+      noModelHits: 'No matching models — try another keyword',
       freeBadge: 'Free credits',
       checkinBadge: 'Daily check-in',
       footerSource: 'Data sources',
@@ -75,7 +79,7 @@
   // 全球/中国/美国 region-tab order. Every other language uses the en layout.
   var LANGS = window.LANGS;
   var BUILT_IN = { zh: true, en: true };
-  var PACK_VERSION = '3';
+  var PACK_VERSION = '4';
 
   function findLang(code) {
     for (var i = 0; i < LANGS.length; i++) { if (LANGS[i].code === code) return LANGS[i]; }
@@ -361,6 +365,54 @@
       '</section>';
   }
 
+  function regionLabel(rg) {
+    return t(rg === 'cn' ? 'rankRegionCN' : rg === 'us' ? 'rankRegionUS' : 'rankRegionGlobal');
+  }
+
+  // Model search: one query spans every board. A model listed both worldwide and
+  // regionally is reported once, on its global row, because that rank is the one
+  // the boards agree on; the region rows only add models the global slice cut.
+  function rankHits(q) {
+    var hits = [];
+    (window.RANK_BOARDS || []).forEach(function (board) {
+      var seen = Object.create(null);
+      ['global', 'cn', 'us'].forEach(function (rg) {
+        (board.items[rg] || []).forEach(function (it) {
+          if (seen[it.name]) return;
+          if ((it.name + ' ' + it.org).toLowerCase().indexOf(q) === -1) return;
+          seen[it.name] = 1;
+          hits.push({ board: board, region: rg, item: it });
+        });
+      });
+    });
+    return hits;
+  }
+
+  function rankSearchHtml(q) {
+    var hits = rankHits(q);
+    var rows = hits.map(function (h) {
+      var it = h.item;
+      var boardLabel = boardText(h.board, 'label') + (h.region === 'global' ? '' : ' · ' + regionLabel(h.region));
+      return '<li class="rank-row rank-hit' + (it.r <= 3 ? ' top' + it.r : '') + '">' +
+        '<span class="rank-no">' + it.r + '</span>' +
+        '<span class="rank-name">' + it.name + '</span>' +
+        '<span class="rank-org">' + it.org + '</span>' +
+        '<span class="rank-board">' + boardLabel + '</span>' +
+        '<span class="rank-score">' + fmtScore(it.score, h.board.digits) + '</span>' +
+        '</li>';
+    }).join('');
+    return '<section class="panel rank-panel" id="sec-rank">' +
+      '<header class="panel-head"><h2>' + t('rankTitle') + '</h2>' +
+      '<span class="rank-meta">' + (hits.length ? hits.length + ' ' + t('modelHits') : t('noModelHits')) + '</span>' +
+      '</header>' +
+      (rows ? '<ol class="rank-list">' + rows + '</ol>' : '') +
+      '</section>';
+  }
+
+  function rankSectionHtml() {
+    return state.globalQ ? rankSearchHtml(state.globalQ) : rankHtml();
+  }
+
   function bindRankTabs() {
     var sec = document.getElementById('sec-rank');
     if (!sec) return;
@@ -375,7 +427,7 @@
           if (btn.dataset.region === state.rankRegion) return;
           state.rankRegion = btn.dataset.region;
         } else return;
-        sec.outerHTML = rankHtml();
+        sec.outerHTML = rankSectionHtml();
         bindRankTabs();
         bindRankToggle();
         var active = document.querySelector('#sec-rank .rank-tabs-scroll .rank-tab.active');
@@ -425,16 +477,31 @@
       '<span class="global-count" id="global-count" hidden></span>';
   }
 
+  // The rank panel swaps its single-board table for cross-board model hits, so
+  // the tab handlers must be rebound against the replacement node on each keystroke.
+  function refreshRankSection() {
+    var sec = document.getElementById('sec-rank');
+    if (!sec) return;
+    sec.outerHTML = rankSectionHtml();
+    bindRankTabs();
+    bindRankToggle();
+    if (!state.globalQ) return;
+    document.querySelectorAll('#sec-rank .rank-hit .rank-name, #sec-rank .rank-hit .rank-org')
+      .forEach(function (el) { markText(el, state.globalQ); });
+  }
+
   function applyGlobalSearch() {
     document.querySelectorAll('#app section.panel').forEach(function (panel) {
       if (!panel.querySelector('.panel-search')) return;
       panel.dataset.expanded = state.globalQ ? '1' : '0';
       applyFilter(panel);
     });
+    refreshRankSection();
     var total = 0;
     document.querySelectorAll('#app .card').forEach(function (c) {
       if (!c.hidden && !c.classList.contains('collapsed-hide')) total++;
     });
+    total += document.querySelectorAll('#sec-rank .rank-hit').length;
     var el = document.getElementById('global-count');
     if (el) {
       el.hidden = !state.globalQ;
@@ -484,7 +551,7 @@
     var skills = sectionHtml('sec-skills', t('skillsCol'), '', window.SKILLS, 4);
 
     document.getElementById('app').innerHTML =
-      '<div class="cols">' + (cnFirst() ? cn + us : us + cn) + '</div>' + oss + skills + rankHtml();
+      '<div class="cols">' + (cnFirst() ? cn + us : us + cn) + '</div>' + oss + skills + rankSectionHtml();
 
     document.getElementById('site-title').textContent = t('siteTitle');
     document.getElementById('subtitle').textContent = t('siteSub');
