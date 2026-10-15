@@ -174,7 +174,7 @@ ${LANGS.slice(1).map((l) => `  <meta property="og:locale:alternate" content="${l
 ${JSON.stringify(jsonLd, null, 2)}
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=15">`;
+  <link rel="stylesheet" href="css/styles.css?v=16">`;
 
 const indexHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -237,7 +237,7 @@ ${LANGS.map((l) => `          <option value="${l.code}"${l.code === 'zh' ? ' sel
   </footer>
 
   <script src="js/data.js?v=21"></script>
-  <script src="js/app.js?v=27"></script>
+  <script src="js/app.js?v=28"></script>
 </body>
 </html>
 `;

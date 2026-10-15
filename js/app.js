@@ -528,8 +528,32 @@
     highlightNav();
   }
 
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Highlights every case-insensitive occurrence of `q` inside one element.
+  // The source text is read back with textContent, which already strips any
+  // previous <mark> wrapper, so this stays idempotent across keystrokes.
+  function markText(el, q) {
+    if (!el) return;
+    var text = el.textContent;
+    if (!q) { el.textContent = text; return; }
+    var low = text.toLowerCase();
+    var out = '';
+    var from = 0;
+    var i = low.indexOf(q, from);
+    while (i !== -1) {
+      out += escapeHtml(text.slice(from, i)) + '<mark>' + escapeHtml(text.slice(i, i + q.length)) + '</mark>';
+      from = i + q.length;
+      i = low.indexOf(q, from);
+    }
+    el.innerHTML = out + escapeHtml(text.slice(from));
+  }
+
   function applyFilter(panel) {
     var q = panel.querySelector('.panel-search').value.trim().toLowerCase();
+    var eff = q || state.globalQ;
     var cat = panel.dataset.cat || 'all';
     var visible = 0;
     panel.querySelectorAll('.card').forEach(function (card) {
@@ -539,6 +563,9 @@
       var hit = matchCat && matchQ;
       card.hidden = !hit;
       if (hit) visible++;
+      markText(card.querySelector('.card-name'), hit ? eff : '');
+      markText(card.querySelector('.card-intro'), hit ? eff : '');
+      markText(card.querySelector('.card-tag'), hit ? eff : '');
     });
     panel.querySelector('.empty').hidden = visible !== 0;
     applyCollapse(panel);

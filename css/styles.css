@@ -311,6 +311,13 @@ main {
   white-space: nowrap;
 }
 
+mark {
+  background: rgba(108, 140, 255, .34);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
 .empty { grid-column: 1 / -1; text-align: center; color: var(--text-dim); font-size: 13px; margin: 8px 0; }
 
 /* ---------- ranking ---------- */
