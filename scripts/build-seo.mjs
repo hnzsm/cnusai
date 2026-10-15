@@ -236,7 +236,7 @@ ${LANGS.map((l) => `          <option value="${l.code}"${l.code === 'zh' ? ' sel
     <div class="footer-bottom"><span id="footer">© ${new Date().getFullYear()} 中美 AI 导航 · 数据仅供导航参考 · 语言可手动切换</span></div>
   </footer>
 
-  <script src="js/data.js?v=20"></script>
+  <script src="js/data.js?v=21"></script>
   <script src="js/app.js?v=27"></script>
 </body>
 </html>
@@ -304,7 +304,12 @@ const DIST_DIRS = ['css', 'js'];
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
 for (const f of DIST_FILES) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f));
-for (const d of DIST_DIRS) fs.cpSync(path.join(ROOT, d), path.join(DIST, d), { recursive: true });
+for (const d of DIST_DIRS) fs.cpSync(path.join(ROOT, d), path.join(DIST, d), {
+  recursive: true,
+  // update-ranking.mjs leaves js/data.js.bak behind; shipping it would put a
+  // stale full copy of the dataset in front of every visitor.
+  filter: (src) => !/\.(bak|map|log)$/.test(src)
+});
 
 const sizeOf = (dir) => fs.readdirSync(dir, { withFileTypes: true })
   .reduce((sum, e) => sum + (e.isDirectory() ? sizeOf(path.join(dir, e.name)) : fs.statSync(path.join(dir, e.name)).size), 0);
