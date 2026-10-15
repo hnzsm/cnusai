@@ -236,8 +236,8 @@ ${LANGS.map((l) => `          <option value="${l.code}"${l.code === 'zh' ? ' sel
     <div class="footer-bottom"><span id="footer">© ${new Date().getFullYear()} 中美 AI 导航 · 数据仅供导航参考 · 语言可手动切换</span></div>
   </footer>
 
-  <script src="js/data.js?v=19"></script>
-  <script src="js/app.js?v=26"></script>
+  <script src="js/data.js?v=20"></script>
+  <script src="js/app.js?v=27"></script>
 </body>
 </html>
 `;

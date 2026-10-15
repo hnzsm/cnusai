@@ -75,7 +75,7 @@
   // 全球/中国/美国 region-tab order. Every other language uses the en layout.
   var LANGS = window.LANGS;
   var BUILT_IN = { zh: true, en: true };
-  var PACK_VERSION = '2';
+  var PACK_VERSION = '3';
 
   function findLang(code) {
     for (var i = 0; i < LANGS.length; i++) { if (LANGS[i].code === code) return LANGS[i]; }
