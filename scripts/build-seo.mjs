@@ -169,6 +169,11 @@ ${LANGS.slice(1).map((l) => `  <meta property="og:locale:alternate" content="${l
   <link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
   <link rel="apple-touch-icon" href="logo.svg?v=2">
 
+  <!-- Google AdSense -->
+  <meta name="google-adsense-account" content="ca-pub-1857490808347922">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1857490808347922"
+    crossorigin="anonymous"></script>
+
   <!-- Structured data -->
   <script type="application/ld+json">
 ${JSON.stringify(jsonLd, null, 2)}
@@ -299,7 +304,7 @@ fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemap, 'utf8');
 // tree and a single 129 MB workerd binary breaks the 25 MiB per-asset limit.
 // `dist/` holds only the files a visitor actually needs.
 const DIST = path.join(ROOT, 'dist');
-const DIST_FILES = ['index.html', 'robots.txt', 'sitemap.xml', 'logo.svg', 'og-cover.png'];
+const DIST_FILES = ['index.html', 'robots.txt', 'sitemap.xml', 'logo.svg', 'og-cover.png', 'ads.txt'];
 const DIST_DIRS = ['css', 'js'];
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
